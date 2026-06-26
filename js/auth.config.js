@@ -34,14 +34,14 @@ window.PNX_AUTH_CONFIG = {
   // Azure Portal > App registrations > (your app) > Application (client) ID.
   // tenant: "common" (any Microsoft account), "organizations", or your tenant ID.
   microsoft: {
-    clientId: "",            // <-- paste to enable real Microsoft login
+    clientId: "b3b03b84-9bb4-4da0-a9ca-6d88012c4bc1",            // <-- paste to enable real Microsoft login
     tenant:   "common"
   },
 
   /* -- Google sign-in ------------------------------------------------------ */
   // Google Cloud Console > Credentials > OAuth client (Web) > Client ID.
   google: {
-    clientId: ""             // <-- paste (ends in .apps.googleusercontent.com)
+    clientId: "42453408326-ah44476f73ikvvnd8cs6vm2u8eafqkla.apps.googleusercontent.com"             // <-- paste (ends in .apps.googleusercontent.com)
   },
 
   /* -- Web3Forms: an email EVERY time someone opens the demo --------------- */
