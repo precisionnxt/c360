@@ -48,8 +48,8 @@ window.PNX_AUTH_CONFIG = {
   // Free, no server. Get an Access Key in seconds at https://web3forms.com by
   // entering the inbox below — every demo entry is then emailed there.
   web3forms: {
-    accessKey:   "",                       // <-- paste your Web3Forms Access Key
-    notifyEmail: "ajay@theteamalpha.net"   // the inbox tied to the key (for reference)
+    accessKey:   "a12fdb48-ec17-4f1c-86fb-770be219adb8",                       // <-- paste your Web3Forms Access Key
+    notifyEmail: "precisionnxt@gmail.com"   // the inbox tied to the key (for reference)
   },
 
   /* -- Local preview ONLY -------------------------------------------------- */
