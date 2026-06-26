@@ -34,7 +34,7 @@ window.PNX_AUTH_CONFIG = {
   // Azure Portal > App registrations > (your app) > Application (client) ID.
   // tenant: "common" (any Microsoft account), "organizations", or your tenant ID.
   microsoft: {
-    clientId: "b3b03b84-9bb4-4da0-a9ca-6d88012c4bc1",            // <-- paste to enable real Microsoft login
+    clientId: "d9056422-fc27-456e-9bfb-c770054d634b",            // <-- paste to enable real Microsoft login
     tenant:   "common"
   },
 
