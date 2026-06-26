@@ -1,0 +1,83 @@
+/* ============================================================================
+   auth.css  —  sign-in dialog + signed-in pill for the Customer 360 trial
+   ----------------------------------------------------------------------------
+   Loaded on BOTH pages. It does NOT hide the app — the app page renders fully;
+   access is controlled by a redirect guard in auth.js. Reuses the app's design
+   tokens (--green/--blue) when present, with safe fallbacks.
+   ========================================================================== */
+
+:root { --pnx-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+/* ---- Sign-in modal --------------------------------------------------------*/
+#pnx-modal { position: fixed; inset: 0; z-index: 2147483000; display: flex; align-items: center; justify-content: center; padding: 22px; font-family: var(--pnx-font); }
+.pnx-modal-bg { position: absolute; inset: 0; background: rgba(8,14,26,.62); backdrop-filter: blur(4px); }
+/* Blocking access gate (app page, not signed in): fully obscure the app behind it. */
+#pnx-modal.pnx-gate .pnx-modal-bg { background: rgba(8,14,26,.82); backdrop-filter: blur(12px); }
+.pnx-modal-card {
+  position: relative; z-index: 1; width: 100%; max-width: 412px;
+  background: #fff; border-radius: 18px; padding: 30px 30px 24px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.45); animation: pnx-rise .3s cubic-bezier(.2,.7,.2,1) both;
+}
+@keyframes pnx-rise { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+.pnx-x { position: absolute; top: 12px; right: 14px; border: 0; background: none; font-size: 26px; line-height: 1; color: #94a3b8; cursor: pointer; }
+.pnx-x:hover { color: #475569; }
+
+.pnx-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.pnx-logo {
+  display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px;
+  border-radius: 12px; font-weight: 800; font-size: 15px; color: #fff;
+  background: linear-gradient(135deg, var(--green, #16a34a), var(--blue, #2563eb)); box-shadow: 0 6px 16px rgba(22,163,74,.35);
+}
+.pnx-brandname { font-weight: 800; font-size: 16px; color: #0f172a; }
+.pnx-tagline { font-size: 12.5px; color: #64748b; margin-top: 2px; }
+.pnx-h1 { margin: 4px 0 4px; font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -.2px; }
+.pnx-blurb { margin: 0 0 18px; font-size: 14px; color: #475569; line-height: 1.5; }
+
+.pnx-providers { display: flex; flex-direction: column; gap: 10px; }
+.pnx-gg-mount { display: flex; justify-content: center; min-height: 44px; }
+
+.pnx-btn { font: inherit; cursor: pointer; border: 0; border-radius: 11px; padding: 12px 16px; font-size: 14.5px; font-weight: 600; transition: transform .08s, box-shadow .15s, border-color .15s, background .15s; }
+.pnx-btn:active { transform: translateY(1px); }
+.pnx-btn-provider { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background: #fff; color: #1f2937; border: 1.5px solid #e2e8f0; }
+.pnx-btn-provider:hover { border-color: #cbd5e1; box-shadow: 0 4px 14px rgba(15,23,42,.10); }
+.pnx-btn-primary { width: 100%; color: #fff; margin-top: 4px; background: linear-gradient(135deg, var(--green, #16a34a), #15803d); box-shadow: 0 8px 20px rgba(22,163,74,.30); }
+.pnx-btn-ghost { width: 100%; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+.pnx-btn-ghost:hover { background: #e9eef5; }
+.pnx-btn.pnx-busy { opacity: .7; cursor: progress; }
+
+.pnx-secure { margin-top: 16px; text-align: center; font-size: 12px; color: #94a3b8; }
+.pnx-setup { font-size: 13px; line-height: 1.5; color: #b45309; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 14px; }
+.pnx-setup code { background: #fef3c7; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+.pnx-or { display: flex; align-items: center; gap: 10px; color: #94a3b8; font-size: 12px; margin: 4px 0; }
+.pnx-or::before, .pnx-or::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; }
+
+#pnx-preview { display: flex; flex-direction: column; gap: 10px; margin-top: 2px; }
+.pnx-preview-note { font-size: 11.5px; color: #94a3b8; }
+.pnx-field { display: flex; flex-direction: column; gap: 5px; }
+.pnx-field span { font-size: 12px; font-weight: 600; color: #475569; }
+.pnx-field input { font: inherit; font-size: 14px; padding: 10px 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; color: #0f172a; }
+.pnx-field input:focus { outline: none; border-color: var(--green, #16a34a); box-shadow: 0 0 0 3px rgba(22,163,74,.15); }
+
+/* ---- Signed-in pill (app page) -------------------------------------------*/
+#pnx-userpill {
+  position: fixed; left: 16px; bottom: 16px; z-index: 2147482000; display: flex; align-items: center; gap: 10px;
+  background: rgba(15,23,42,.92); color: #e2e8f0; border: 1px solid rgba(255,255,255,.12); border-radius: 999px;
+  padding: 7px 8px 7px 14px; font-size: 12.5px; font-family: var(--pnx-font);
+  box-shadow: 0 10px 30px rgba(0,0,0,.30); backdrop-filter: blur(6px);
+}
+#pnx-userpill .pnx-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green, #22c55e); box-shadow: 0 0 0 3px rgba(34,197,94,.25); }
+#pnx-userpill .pnx-pilltext strong { color: #fff; font-weight: 700; }
+#pnx-userpill .pnx-signout { font: inherit; cursor: pointer; color: #cbd5e1; background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.14); border-radius: 999px; padding: 4px 12px; font-weight: 600; }
+#pnx-userpill .pnx-signout:hover { background: rgba(255,255,255,.20); color: #fff; }
+
+@media (max-width: 480px) { .pnx-modal-card { padding: 24px 20px; } .pnx-h1 { font-size: 20px; } }
+
+/* ---- Request-a-demo form ---------------------------------------------------*/
+.pnx-back2{ align-self:flex-start; background:none; border:0; cursor:pointer; color:var(--blue,#2563eb); font:inherit; font-size:13px; font-weight:600; padding:2px 0 4px; }
+.pnx-reqh{ font-size:18px; font-weight:800; color:#0f172a; margin-bottom:2px; }
+#pnx-request{ display:flex; flex-direction:column; gap:11px; }
+.pnx-fine2{ margin:2px 0 0; font-size:11px; color:#94a3b8; line-height:1.45; }
+.pnx-hint{ font-size:12px; line-height:1.5; color:#64748b; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; }
+.pnx-hint code{ background:#eef2f7; padding:1px 5px; border-radius:4px; font-size:11px; }
+.pnx-consent{ display:flex; gap:8px; align-items:flex-start; font-size:12px; color:#475569; line-height:1.4; cursor:pointer; }
+.pnx-consent input{ margin-top:2px; accent-color:var(--green,#5E9F8B); flex:none; }

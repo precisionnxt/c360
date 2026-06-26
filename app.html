@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Customer 360 · Intelligence-in-Action Platform</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="auth.css" />
+<!--
+  Customer 360 — DEMO APP SHELL (unchanged from the base app; access-guarded).
+  js/auth.js shows a sign-in dialog over this page until the visitor authenticates,
+  then removes it so the full app — Guide, Nexi chat and all five personas — works.
+  All chrome + content is rendered by js/engine.js. To edit CONTENT, open the
+  js/content.<persona>.js file — not this shell.
+-->
+</head>
+<body data-pnx-page="app">
+<div class="app">
+
+  <!-- LEFT: sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo"><svg width="27" height="27" viewBox="0 0 24 24" fill="none"><path d="M18 5.3 A9 9 0 1 0 18 18.7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><circle cx="18" cy="5.3" r="2.1" fill="#CFC4F2"/><circle cx="12" cy="12" r="3" fill="none" stroke="#CFC4F2" stroke-width="1.3"/><circle cx="12" cy="12" r="1.2" fill="#fff"/><circle cx="12" cy="12" r="3" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.85"><animate attributeName="r" values="2.5;11;2.5" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.85;0;0.85" dur="2.4s" repeatCount="indefinite"/></circle></svg></div>
+      <div class="nm" id="brand-name">Customer 360<small>PrecisionNeXT Intelligence</small></div>
+    </div>
+    <nav class="nav" id="nav"><!-- rendered --></nav>
+    <div class="foot" id="foot"><!-- rendered --></div>
+  </aside>
+
+  <!-- RIGHT: main -->
+  <div class="main">
+
+    <!-- TOPBAR: clean utility only —  [ AI Search ] [ Insights ] [ Settings ] [ Profile ] -->
+    <header class="topbar">
+      <div class="crumb" id="crumb"><!-- group · section (top corner) --></div>
+      <div class="tb-right">
+        <!-- Search/filter (right-anchored, stable). Distinct from Nexi chat (bottom-right). -->
+        <div class="ai-search-wrap">
+          <div class="ai-search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input id="ai-search" placeholder="Search HCPs, accounts, insights…" autocomplete="off" />
+          </div>
+          <div class="ai-sugg" id="ai-sugg"><!-- directory results --></div>
+        </div>
+        <!-- Guide opens full-canvas (product guide + pulse) -->
+        <button class="tb-btn" id="ins-btn" title="Open the product guide">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 5.3L20 8l-4 4 1 6-5-2.8L7 18l1-6-4-4 5.6-.7z"/></svg>
+          Guide
+        </button>
+        <div class="pop-wrap">
+          <button class="tb-btn" id="set-btn" title="Product settings">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.2A1.7 1.7 0 0 0 6 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H0M19.4 11a1.7 1.7 0 0 1-1.2-2.9l.1-.1a2 2 0 1 0-2.8-2.8l-.1.1A1.7 1.7 0 0 1 11 4.6"/></svg>
+            Settings
+          </button>
+          <div class="pop" id="set-pop"><!-- rendered --></div>
+        </div>
+        <div class="psw">
+          <button class="psw-btn" id="psw-btn" title="Your profile">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c.6-3.4 3.3-5.5 6.5-5.5s5.9 2.1 6.5 5.5"/></svg>
+          </button>
+          <div class="psw-menu" id="psw-menu"><!-- rendered --></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- SECTION INTRO: one-line description + chips (no repeated title — the title is the top-corner breadcrumb) -->
+    <section class="summary">
+      <p id="sum-desc">—</p>
+      <div class="chips" id="sum-chips"></div>
+    </section>
+
+    <!-- CONTENT -->
+    <main class="content" id="content"><!-- rendered --></main>
+  </div>
+</div>
+
+<!-- Nexi: toast · FAB (toggles open/close) · chat window -->
+<div class="pni-toast" id="pni-toast">
+  <div class="h"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 5.3L20 8l-4 4 1 6-5-2.8L7 18l1-6-4-4 5.6-.7z"/></svg> New Intelligence<span class="x" id="pni-toast-x">×</span></div>
+  <div class="t" id="pni-toast-t">—</div>
+  <div class="d" id="pni-toast-d">—</div>
+</div>
+
+<button class="pni-fab" id="pni-fab" aria-label="Open or close Nexi">
+  <span class="ring"></span>
+  <span class="ico-spark"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M12 2l2.4 5.3L20 8l-4 4 1 6-5-2.8L7 18l1-6-4-4 5.6-.7z"/></svg></span>
+  <span class="ico-x"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+  <span class="cnt" id="pni-cnt">2</span>
+</button>
+
+<section class="pni" id="pni">
+  <div class="pni-h">
+    <div class="a"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 2l2.4 5.3L20 8l-4 4 1 6-5-2.8L7 18l1-6-4-4 5.6-.7z"/></svg></div>
+    <div class="ti"><h3>Nexi</h3><p>Agentic AI · PrecisionNeXT</p></div>
+  </div>
+  <div class="pni-body" id="pni-body"><!-- alerts + chat --></div>
+  <div class="pni-sg" id="pni-sg"><!-- suggestion chips --></div>
+  <form class="pni-c" id="pni-form" autocomplete="off">
+    <input id="pni-input" placeholder="Ask Nexi anything…" />
+    <button class="snd" type="submit" aria-label="Send"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M3 11l18-8-8 18-2-7-8-3z"/></svg></button>
+  </form>
+</section>
+
+<!--
+  SCRIPT LOAD ORDER (important):
+   1) app.config.js    — creates the C360 namespace, app meta + nav
+   2) content.*.js     — each persona registers itself (order among these doesn't matter)
+   3) content.shared.js— shared feature scaffolds
+   4) engine.js        — renders everything + boots (must be LAST app script)
+   5) auth.config.js + auth.js — the access guard (added; runs after the app renders)
+-->
+<script src="js/app.config.js"></script>
+<script src="js/content.rep.js"></script>
+<script src="js/content.msl.js"></script>
+<script src="js/content.kam.js"></script>
+<script src="js/content.mkt.js"></script>
+<script src="js/content.lead.js"></script>
+<script src="js/content.shared.js"></script>
+<script src="js/data.hcps.js"></script>
+<script src="js/engine.js"></script>
+
+<script src="js/auth.config.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>
