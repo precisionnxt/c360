@@ -16,7 +16,7 @@
    convenience is a preview that is AUTOMATICALLY disabled on real domains.
    Everything runs in the browser — correct for a static GitHub Pages site.
 
-   "request a live demo" is a LEAD-CAPTURE path only — it asks for an email, records
+   "Request a live demo" is a LEAD-CAPTURE path only — it asks for an email, records
    the request (emails you via Web3Forms) and returns the visitor to the home
    page. It NEVER grants access to the demo; only a real Google/Microsoft
    sign-in opens the app.
@@ -113,7 +113,7 @@
       .catch(function (err) { console.warn("[PNX] Web3Forms email failed:", err); });
   }
 
-  /* ---- "request a live demo" lead notification (NO app access granted) ------- */
+  /* ---- "Request a live demo" lead notification (NO app access granted) ------- */
   function notifyLead(lead) {
     var key = (WF.accessKey || "").trim();
     if (!key) {
@@ -130,7 +130,7 @@
         from_name: BRAND + " demo request",
         email: lead.email,
         "Name": lead.name, "Work email": lead.email, "Company": lead.company || "—", "Role": lead.role || "—",
-        "Type": "request a live demo (lead — no app access granted)",
+        "Type": "Request a live demo (lead — no app access granted)",
         "Wants the team to contact them": lead.consent ? "YES" : "no",
         "Time": new Date().toString()
       })
@@ -231,23 +231,23 @@
     }
     if (GG_LIVE) { var mount = el("div", { id: "pnx-gg-mount", class: "pnx-gg-mount" }); row.appendChild(mount); mountGoogle(mount); }
 
-    // "request a live demo" — lead capture only: collect an email, then we follow up.
+    // "Request a live demo" — lead capture only: collect an email, then we follow up.
     if (MS_LIVE || GG_LIVE) row.appendChild(el("div", { class: "pnx-or" }, "<span>or</span>"));
-    var rq = el("button", { type: "button", class: "pnx-btn pnx-btn-ghost" }, "request a live demo — leave your email");
+    var rq = el("button", { type: "button", class: "pnx-btn pnx-btn-ghost" }, "Request a live demo — leave your email");
     rq.addEventListener("click", function () { renderRequest(true); });
     row.appendChild(rq);
   }
 
-  /* ---- request a live demo: EMAIL ONLY, no access, returns to home ----------- */
+  /* ---- Request a live demo: EMAIL ONLY, no access, returns to home ----------- */
   // fromChooser = true → reached from the sign-in chooser (offer a "Back" link)
-  // fromChooser = false → opened directly from a "request a live demo" button
+  // fromChooser = false → opened directly from a "Request a live demo" button
   function renderRequest(fromChooser) {
     var card = document.getElementById("pnx-modal-card"); if (!card) return;
     card.innerHTML =
       (GATE ? "" : '<button type="button" class="pnx-x" aria-label="Close">&times;</button>') +
       '<div class="pnx-brand"><span class="pnx-logo">Nexi</span><div class="pnx-brandtext">' +
         '<div class="pnx-brandname">' + escapeHtml(BRAND) + '</div><div class="pnx-tagline">' + escapeHtml(TAGLINE) + '</div></div></div>' +
-      '<h2 class="pnx-h1">request a live demo</h2>' +
+      '<h2 class="pnx-h1">Request a live demo</h2>' +
       '<p class="pnx-blurb">Share your details and our team will get back to you soon.</p>' +
       '<form id="pnx-request" class="pnx-providers" novalidate="novalidate">' +
         '<label class="pnx-field"><span>Full name *</span><input name="name" type="text" autocomplete="name" placeholder="Alex Morgan" required></label>' +
@@ -255,7 +255,7 @@
         '<label class="pnx-field"><span>Company *</span><input name="company" type="text" autocomplete="organization" placeholder="Acme Pharma" required></label>' +
         '<label class="pnx-field"><span>Your role</span><input name="role" type="text" placeholder="e.g. Sales Director"></label>' +
         '<label class="pnx-consent"><input type="checkbox" name="consent" checked> Yes — I\'d like the team to contact me about ' + escapeHtml(BRAND) + '.</label>' +
-        '<button type="submit" class="pnx-btn pnx-btn-primary">request a live demo →</button>' +
+        '<button type="submit" class="pnx-btn pnx-btn-primary">Request a live demo →</button>' +
         (fromChooser ? '<button type="button" class="pnx-back2" aria-label="Back">&larr; Back to sign in</button>' : '') +
       '</form>' +
       '<div class="pnx-secure">🔒 We only use your details to contact you about your demo request.</div>';
@@ -321,7 +321,7 @@
 
     // LANDING: wire triggers.
     //   [data-pnx-signin]            -> sign-in chooser (Google/Microsoft + request option)
-    //   [data-pnx-signin="request"]  -> email-only "request a live demo" lead form (no access)
+    //   [data-pnx-signin="request"]  -> email-only "Request a live demo" lead form (no access)
     window.PNX = window.PNX || {};
     window.PNX.openSignIn = function () { openSignIn(false); };
     window.PNX.requestDemo = function () { openSignIn(false, "request"); };
