@@ -116,11 +116,22 @@
     setBusy(btn, true);
     loadScript("https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js")
       .then(function () {
-        var pca = new msal.PublicClientApplication({ auth: { clientId: MS.clientId, authority: "https://login.microsoftonline.com/" + (MS.tenant || "common"), redirectUri: location.href.split("#")[0] }, cache: { cacheLocation: "sessionStorage" } });
-        return pca.loginPopup({ scopes: ["openid", "profile", "email"] });
+        var pca = new msal.PublicClientApplication({
+          auth: {
+            clientId: MS.clientId,
+            authority: "https://login.microsoftonline.com/" + (MS.tenant || "common"),
+            // Fixed, lightweight redirect target (same on every page) so the popup never
+            // reloads the full app — this is what caused the sign-in loop.
+            redirectUri: new URL("auth-redirect.html", location.href).href,
+            navigateToLoginRequestUrl: false
+          },
+          cache: { cacheLocation: "localStorage" }
+        });
+        // Full-page redirect flow — the most reliable on static hosting (no popup loops/spin).
+        // Sign-in finishes on auth-redirect.html, which records the user and opens the demo.
+        return pca.loginRedirect({ scopes: ["openid", "profile", "email"], prompt: "select_account" });
       })
-      .then(function (res) { var a = res.account || {}, c = res.idTokenClaims || {}; completeSignIn({ name: a.name || c.name, email: a.username || c.preferred_username || c.email, provider: "microsoft" }); })
-      .catch(function (err) { console.warn("[PNX] Microsoft sign-in cancelled/failed:", err); setBusy(btn, false); });
+      .catch(function (err) { console.warn("[PNX] Microsoft sign-in failed to start:", err); setBusy(btn, false); });
   }
   function mountGoogle(container) {
     if (!GG_LIVE) return;
