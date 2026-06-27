@@ -21,7 +21,7 @@ window.PNX_AUTH_CONFIG = {
   app: {
     name:    "Customer 360",
     tagline: "PrecisionNeXT Intelligence",
-    blurb:   "Sign in with your Google or Microsoft account to open the free demo."
+    blurb:   "with your Google or Microsoft account."
   },
 
   /* -- Page filenames (leave as-is unless you rename them) ----------------- */
