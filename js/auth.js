@@ -15,6 +15,11 @@
    Authentic by design: no "type any email" path on a live site. The only local
    convenience is a preview that is AUTOMATICALLY disabled on real domains.
    Everything runs in the browser — correct for a static GitHub Pages site.
+
+   "Request a demo" is a LEAD-CAPTURE path only — it asks for an email, records
+   the request (emails you via Web3Forms) and returns the visitor to the home
+   page. It NEVER grants access to the demo; only a real Google/Microsoft
+   sign-in opens the app.
    ========================================================================== */
 
 (function () {
@@ -108,6 +113,32 @@
       .catch(function (err) { console.warn("[PNX] Web3Forms email failed:", err); });
   }
 
+  /* ---- "Request a demo" lead notification (NO app access granted) ------- */
+  function notifyLead(email) {
+    var key = (WF.accessKey || "").trim();
+    if (!key) {
+      console.info("[PNX] Demo request:", email, "— Web3Forms key not set, no email sent.");
+      return;
+    }
+    fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      keepalive: true,
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        access_key: key,
+        subject: "Customer 360 — Demo request from " + email,
+        from_name: BRAND + " demo request",
+        email: email,
+        "Work email": email,
+        "Type": "Request a demo (lead — no app access granted)",
+        "Time": new Date().toString()
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { console.info("[PNX] Lead email sent:", !!d.success); })
+      .catch(function (err) { console.warn("[PNX] Lead email failed:", err); });
+  }
+
   /* ====================================================================== */
   /*  REAL OAUTH                                                            */
   /* ====================================================================== */
@@ -172,8 +203,10 @@
     back.appendChild(el("div", { class: "pnx-modal-card", id: "pnx-modal-card" }));
     document.body.appendChild(back);
     if (!GATE) back.querySelector(".pnx-modal-bg").addEventListener("click", closeSignIn);
-    renderChooser();
-    if (mode === "request") renderRequestForm(back.querySelector(".pnx-providers"), true);  // jump straight to the contact form
+    // "request" → email-only lead capture (no Google/Microsoft, no app access).
+    // anything else → the real sign-in chooser that opens the demo.
+    if (mode === "request") renderRequest(false);
+    else renderChooser();
   }
   function closeSignIn() { var m = document.getElementById("pnx-modal"); if (m) m.parentNode.removeChild(m); }
 
@@ -197,35 +230,59 @@
     }
     if (GG_LIVE) { var mount = el("div", { id: "pnx-gg-mount", class: "pnx-gg-mount" }); row.appendChild(mount); mountGoogle(mount); }
 
-    // "Request a demo" — always available: capture contact details, then open the demo.
+    // "Request a demo" — lead capture only: collect an email, then we follow up.
     if (MS_LIVE || GG_LIVE) row.appendChild(el("div", { class: "pnx-or" }, "<span>or</span>"));
-    var rq = el("button", { type: "button", class: "pnx-btn pnx-btn-ghost" }, "Request a demo — enter your details");
-    rq.addEventListener("click", function () { renderRequestForm(card.querySelector(".pnx-providers"), true); });
+    var rq = el("button", { type: "button", class: "pnx-btn pnx-btn-ghost" }, "Request a demo — leave your email");
+    rq.addEventListener("click", function () { renderRequest(true); });
     row.appendChild(rq);
   }
 
-  // Request-a-demo contact form: collects details, records the lead, opens the demo.
-  function renderRequestForm(row, clear) {
-    if (clear) row.innerHTML = "";
-    var f = el("form", { id: "pnx-request", novalidate: "novalidate" },
-      '<button type="button" class="pnx-back2" aria-label="Back">&larr; Back</button>' +
-      '<div class="pnx-reqh">Request your free demo</div>' +
-      '<label class="pnx-field"><span>Full name *</span><input name="name" type="text" autocomplete="name" placeholder="Alex Morgan" required></label>' +
-      '<label class="pnx-field"><span>Work email *</span><input name="email" type="email" autocomplete="email" placeholder="alex@company.com" required></label>' +
-      '<label class="pnx-field"><span>Company *</span><input name="company" type="text" autocomplete="organization" placeholder="Acme Pharma" required></label>' +
-      '<label class="pnx-field"><span>Your role</span><input name="role" type="text" placeholder="e.g. Sales Director"></label>' +
-      '<label class="pnx-consent"><input type="checkbox" name="consent" checked> Yes — I\'d like the team to contact me about Customer 360.</label>' +
-      '<button type="submit" class="pnx-btn pnx-btn-primary">Open the demo →</button>');
+  /* ---- Request a demo: EMAIL ONLY, no access, returns to home ----------- */
+  // fromChooser = true → reached from the sign-in chooser (offer a "Back" link)
+  // fromChooser = false → opened directly from a "Request a demo" button
+  function renderRequest(fromChooser) {
+    var card = document.getElementById("pnx-modal-card"); if (!card) return;
+    card.innerHTML =
+      (GATE ? "" : '<button type="button" class="pnx-x" aria-label="Close">&times;</button>') +
+      '<div class="pnx-brand"><span class="pnx-logo">Nexi</span><div class="pnx-brandtext">' +
+        '<div class="pnx-brandname">' + escapeHtml(BRAND) + '</div><div class="pnx-tagline">' + escapeHtml(TAGLINE) + '</div></div></div>' +
+      '<h2 class="pnx-h1">Request a free demo</h2>' +
+      '<p class="pnx-blurb">Leave your work email and our team will get back to you soon.</p>' +
+      '<form id="pnx-request" class="pnx-providers" novalidate="novalidate">' +
+        '<label class="pnx-field"><span>Work email *</span><input name="email" type="email" autocomplete="email" placeholder="you@company.com" required></label>' +
+        '<button type="submit" class="pnx-btn pnx-btn-primary">Request a demo →</button>' +
+        (fromChooser ? '<button type="button" class="pnx-back2" aria-label="Back">&larr; Back to sign in</button>' : '') +
+      '</form>' +
+      '<div class="pnx-secure">🔒 We only use your email to contact you about your demo request.</div>';
+    if (!GATE) { var x = card.querySelector(".pnx-x"); if (x) x.addEventListener("click", closeSignIn); }
+    var f = card.querySelector("#pnx-request");
     f.addEventListener("submit", function (e) {
       e.preventDefault();
-      if (!f.name.value.trim() || !validEmail(f.email.value) || !f.company.value.trim()) {
-        alert("Please enter your name, a valid work email, and your company."); return;
-      }
-      completeSignIn({ name: f.name.value, email: f.email.value, company: f.company.value, role: f.role.value, consent: f.consent.checked, provider: "request-demo" });
+      var email = (f.email.value || "").trim().toLowerCase();
+      if (!validEmail(email)) { alert("Please enter a valid work email address."); return; }
+      setBusy(f.querySelector('button[type="submit"]'), true);
+      notifyLead(email);                 // record the lead — no session, no app access
+      renderRequestThanks();             // "we'll get back to you soon"
     });
-    f.querySelector(".pnx-back2").addEventListener("click", renderChooser);
-    row.appendChild(f);
-    var n = f.querySelector('input[name="name"]'); if (n) n.focus();
+    var bk = f.querySelector(".pnx-back2");
+    if (bk) bk.addEventListener("click", renderChooser);
+    var inp = f.querySelector('input[name="email"]'); if (inp) inp.focus();
+  }
+
+  // Confirmation shown after a demo request — keeps the visitor on the home page.
+  function renderRequestThanks() {
+    var card = document.getElementById("pnx-modal-card"); if (!card) return;
+    card.innerHTML =
+      (GATE ? "" : '<button type="button" class="pnx-x" aria-label="Close">&times;</button>') +
+      '<div class="pnx-brand"><span class="pnx-logo">Nexi</span><div class="pnx-brandtext">' +
+        '<div class="pnx-brandname">' + escapeHtml(BRAND) + '</div><div class="pnx-tagline">' + escapeHtml(TAGLINE) + '</div></div></div>' +
+      '<h2 class="pnx-h1">Thanks — we’ve got your request</h2>' +
+      '<p class="pnx-blurb">Thank you for your interest in ' + escapeHtml(BRAND) + '. Our team will get back to you soon.</p>' +
+      '<div class="pnx-providers"><button type="button" class="pnx-btn pnx-btn-primary" id="pnx-home">Back to home</button></div>' +
+      '<div class="pnx-secure">🔒 We only use your email to contact you about your demo request.</div>';
+    function home() { closeSignIn(); try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) { window.scrollTo(0, 0); } }
+    if (!GATE) { var x = card.querySelector(".pnx-x"); if (x) x.addEventListener("click", home); }
+    var hb = card.querySelector("#pnx-home"); if (hb) hb.addEventListener("click", home);
   }
 
   /* ---- small UI utils --------------------------------------------------- */
@@ -252,7 +309,7 @@
 
     // LANDING: wire triggers.
     //   [data-pnx-signin]            -> sign-in chooser (Google/Microsoft + request option)
-    //   [data-pnx-signin="request"]  -> jumps straight to the "Request a demo" contact form
+    //   [data-pnx-signin="request"]  -> email-only "Request a demo" lead form (no access)
     window.PNX = window.PNX || {};
     window.PNX.openSignIn = function () { openSignIn(false); };
     window.PNX.requestDemo = function () { openSignIn(false, "request"); };
