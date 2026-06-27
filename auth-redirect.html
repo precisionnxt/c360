@@ -56,7 +56,8 @@
         auth: {
           clientId: MS.clientId,
           authority: "https://login.microsoftonline.com/" + (MS.tenant || "common"),
-          redirectUri: location.href.split("#")[0].split("?")[0]   // = this page; must match the Azure SPA redirect URI
+          redirectUri: location.href.split("#")[0].split("?")[0],  // = this page; must match the Azure SPA redirect URI
+          navigateToLoginRequestUrl: false   // don't bounce back to the landing — let us open app.html ourselves
         },
         cache: { cacheLocation: "localStorage" }
       });
