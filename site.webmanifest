@@ -1,0 +1,14 @@
+{
+  "name": "Customer 360 — PrecisionNeXT Intelligence",
+  "short_name": "Customer 360",
+  "description": "Pharma customer intelligence — connected data turned into the next best action for every HCP.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4A90C2",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
