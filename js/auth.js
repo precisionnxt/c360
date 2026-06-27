@@ -114,10 +114,10 @@
   }
 
   /* ---- "Request a demo" lead notification (NO app access granted) ------- */
-  function notifyLead(email) {
+  function notifyLead(lead) {
     var key = (WF.accessKey || "").trim();
     if (!key) {
-      console.info("[PNX] Demo request:", email, "— Web3Forms key not set, no email sent.");
+      console.info("[PNX] Demo request:", lead.email, "— Web3Forms key not set, no email sent.");
       return;
     }
     fetch("https://api.web3forms.com/submit", {
@@ -126,11 +126,12 @@
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify({
         access_key: key,
-        subject: "Customer 360 — Demo request from " + email,
+        subject: "Customer 360 — Demo request: " + lead.name + " (" + (lead.company || "—") + ")",
         from_name: BRAND + " demo request",
-        email: email,
-        "Work email": email,
+        email: lead.email,
+        "Name": lead.name, "Work email": lead.email, "Company": lead.company || "—", "Role": lead.role || "—",
         "Type": "Request a demo (lead — no app access granted)",
+        "Wants the team to contact them": lead.consent ? "YES" : "no",
         "Time": new Date().toString()
       })
     })
@@ -247,26 +248,37 @@
       '<div class="pnx-brand"><span class="pnx-logo">Nexi</span><div class="pnx-brandtext">' +
         '<div class="pnx-brandname">' + escapeHtml(BRAND) + '</div><div class="pnx-tagline">' + escapeHtml(TAGLINE) + '</div></div></div>' +
       '<h2 class="pnx-h1">Request a free demo</h2>' +
-      '<p class="pnx-blurb">Leave your work email and our team will get back to you soon.</p>' +
+      '<p class="pnx-blurb">Share your details and our team will get back to you soon.</p>' +
       '<form id="pnx-request" class="pnx-providers" novalidate="novalidate">' +
-        '<label class="pnx-field"><span>Work email *</span><input name="email" type="email" autocomplete="email" placeholder="you@company.com" required></label>' +
+        '<label class="pnx-field"><span>Full name *</span><input name="name" type="text" autocomplete="name" placeholder="Alex Morgan" required></label>' +
+        '<label class="pnx-field"><span>Work email *</span><input name="email" type="email" autocomplete="email" placeholder="alex@company.com" required></label>' +
+        '<label class="pnx-field"><span>Company *</span><input name="company" type="text" autocomplete="organization" placeholder="Acme Pharma" required></label>' +
+        '<label class="pnx-field"><span>Your role</span><input name="role" type="text" placeholder="e.g. Sales Director"></label>' +
+        '<label class="pnx-consent"><input type="checkbox" name="consent" checked> Yes — I\'d like the team to contact me about ' + escapeHtml(BRAND) + '.</label>' +
         '<button type="submit" class="pnx-btn pnx-btn-primary">Request a demo →</button>' +
         (fromChooser ? '<button type="button" class="pnx-back2" aria-label="Back">&larr; Back to sign in</button>' : '') +
       '</form>' +
-      '<div class="pnx-secure">🔒 We only use your email to contact you about your demo request.</div>';
+      '<div class="pnx-secure">🔒 We only use your details to contact you about your demo request.</div>';
     if (!GATE) { var x = card.querySelector(".pnx-x"); if (x) x.addEventListener("click", closeSignIn); }
     var f = card.querySelector("#pnx-request");
     f.addEventListener("submit", function (e) {
       e.preventDefault();
-      var email = (f.email.value || "").trim().toLowerCase();
-      if (!validEmail(email)) { alert("Please enter a valid work email address."); return; }
+      var name    = (f.querySelector('[name="name"]').value || "").trim();
+      var email   = (f.querySelector('[name="email"]').value || "").trim().toLowerCase();
+      var company = (f.querySelector('[name="company"]').value || "").trim();
+      var role    = (f.querySelector('[name="role"]').value || "").trim();
+      var consent = f.querySelector('[name="consent"]').checked;
+      if (!name || !validEmail(email) || !company) {
+        alert("Please enter your name, a valid work email, and your company."); return;
+      }
       setBusy(f.querySelector('button[type="submit"]'), true);
-      notifyLead(email);                 // record the lead — no session, no app access
+      // record the lead — NO session, NO app access
+      notifyLead({ name: name, email: email, company: company, role: role, consent: consent });
       renderRequestThanks();             // "we'll get back to you soon"
     });
     var bk = f.querySelector(".pnx-back2");
     if (bk) bk.addEventListener("click", renderChooser);
-    var inp = f.querySelector('input[name="email"]'); if (inp) inp.focus();
+    var inp = f.querySelector('input[name="name"]'); if (inp) inp.focus();
   }
 
   // Confirmation shown after a demo request — keeps the visitor on the home page.
