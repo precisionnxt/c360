@@ -7,7 +7,7 @@
 <style>
   body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
         color:#586673; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; background:#F5F8FA; }
-  .box{ text-align:center; max-width:360px; padding:0 20px; }
+  .box{ text-align:center; max-width:380px; padding:0 20px; }
   .spin{ width:34px; height:34px; border:3px solid #E4EAEF; border-top-color:#4A90C2; border-radius:50%;
          margin:0 auto 14px; animation:s .8s linear infinite; }
   @keyframes s{ to{ transform:rotate(360deg); } }
@@ -24,7 +24,6 @@
     in Azure:  https://<you>.github.io/<repo>/auth-redirect.html
   -->
   <script src="js/auth.config.js"></script>
-  <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
   <script>
   (function () {
     var CFG = window.PNX_AUTH_CONFIG || {}, MS = CFG.microsoft || {}, WF = CFG.web3forms || {}, P = CFG.pages || {};
@@ -32,56 +31,74 @@
     function fail(msg) {
       document.querySelector(".box").innerHTML =
         '<b style="color:#16202B">Sign-in problem</b><br><span style="font-size:13px">' + msg +
-        '</span><br><br><a href="' + LANDING + '">← Back to the site</a>';
+        '</span><br><br><a href="' + LANDING + '">&larr; Back to the site</a>';
     }
     if (!MS.clientId) { fail("Microsoft sign-in isn’t configured yet."); return; }
 
-    var pca = new msal.PublicClientApplication({
-      auth: {
-        clientId: MS.clientId,
-        authority: "https://login.microsoftonline.com/" + (MS.tenant || "common"),
-        redirectUri: location.href.split("#")[0].split("?")[0]   // = this page; must match the Azure SPA redirect URI
-      },
-      cache: { cacheLocation: "localStorage" }
-    });
+    // Load MSAL from whichever CDN is reachable (jsDelivr → unpkg → Microsoft).
+    var URLS = [
+      "https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.4/lib/msal-browser.min.js",
+      "https://unpkg.com/@azure/msal-browser@2.38.4/lib/msal-browser.min.js",
+      "https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
+    ];
+    function load(i) {
+      if (typeof msal !== "undefined") return run();
+      if (i >= URLS.length) { fail("Couldn’t load the Microsoft sign-in library — check your network or ad-blocker, then retry."); return; }
+      var s = document.createElement("script");
+      s.src = URLS[i];
+      s.onload = function () { (typeof msal !== "undefined") ? run() : load(i + 1); };
+      s.onerror = function () { load(i + 1); };
+      document.head.appendChild(s);
+    }
 
-    pca.handleRedirectPromise().then(function (res) {
-      if (!res || !res.account) { location.replace(LANDING); return; }  // no pending sign-in → go home
+    function run() {
+      var pca = new msal.PublicClientApplication({
+        auth: {
+          clientId: MS.clientId,
+          authority: "https://login.microsoftonline.com/" + (MS.tenant || "common"),
+          redirectUri: location.href.split("#")[0].split("?")[0]   // = this page; must match the Azure SPA redirect URI
+        },
+        cache: { cacheLocation: "localStorage" }
+      });
 
-      var a = res.account || {}, c = res.idTokenClaims || {};
-      var email = ((a.username || c.preferred_username || c.email) || "").trim().toLowerCase();
-      var name  = (a.name || c.name || (email.split("@")[0] || "there")).trim();
-      var user  = { name: name, email: email, provider: "microsoft", ts: new Date().toISOString() };
+      pca.handleRedirectPromise().then(function (res) {
+        if (!res || !res.account) { location.replace(LANDING); return; }  // no pending sign-in → go home
 
-      // session + known-users — SAME keys auth.js uses, so app.html sees you as signed in
-      try {
-        var known = JSON.parse(localStorage.getItem("pnx_known_users") || "[]");
-        user.isNew = known.indexOf(email) === -1;
-        if (user.isNew) { known.push(email); localStorage.setItem("pnx_known_users", JSON.stringify(known)); }
-        localStorage.setItem("pnx_session", JSON.stringify(user));
-      } catch (e) {}
+        var a = res.account || {}, c = res.idTokenClaims || {};
+        var email = ((a.username || c.preferred_username || c.email) || "").trim().toLowerCase();
+        var name  = (a.name || c.name || (email.split("@")[0] || "there")).trim();
+        var user  = { name: name, email: email, provider: "microsoft", ts: new Date().toISOString() };
 
-      // email the team (Web3Forms) — keepalive so it sends even as we navigate on
-      try {
-        if (WF.accessKey) {
-          fetch("https://api.web3forms.com/submit", {
-            method: "POST", keepalive: true,
-            headers: { "Content-Type": "application/json", "Accept": "application/json" },
-            body: JSON.stringify({
-              access_key: WF.accessKey,
-              subject: "Customer 360 demo — " + (user.isNew ? "New signup" : "Returning") + ": " + name,
-              from_name: "Customer 360 demo", email: email,
-              "Name": name, "Work email": email, "Sign-in": "microsoft",
-              "Status": user.isNew ? "New signup" : "Returning visitor", "Time": new Date().toString()
-            })
-          });
-        }
-      } catch (e) {}
+        try {
+          var known = JSON.parse(localStorage.getItem("pnx_known_users") || "[]");
+          user.isNew = known.indexOf(email) === -1;
+          if (user.isNew) { known.push(email); localStorage.setItem("pnx_known_users", JSON.stringify(known)); }
+          localStorage.setItem("pnx_session", JSON.stringify(user));
+        } catch (e) {}
 
-      location.replace(APP_PAGE);   // open the demo
-    }).catch(function (e) {
-      fail((e && e.errorMessage) || (e && e.message) || String(e));
-    });
+        try {
+          if (WF.accessKey) {
+            fetch("https://api.web3forms.com/submit", {
+              method: "POST", keepalive: true,
+              headers: { "Content-Type": "application/json", "Accept": "application/json" },
+              body: JSON.stringify({
+                access_key: WF.accessKey,
+                subject: "Customer 360 demo — " + (user.isNew ? "New signup" : "Returning") + ": " + name,
+                from_name: "Customer 360 demo", email: email,
+                "Name": name, "Work email": email, "Sign-in": "microsoft",
+                "Status": user.isNew ? "New signup" : "Returning visitor", "Time": new Date().toString()
+              })
+            });
+          }
+        } catch (e) {}
+
+        location.replace(APP_PAGE);   // open the demo
+      }).catch(function (e) {
+        fail((e && e.errorMessage) || (e && e.message) || String(e));
+      });
+    }
+
+    load(0);
   })();
   </script>
 </body>
