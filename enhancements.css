@@ -1,0 +1,125 @@
+/* ============================================================================
+   enhancements.css  —  mobile responsiveness, hamburger drawer, top-bar
+                        contrast, full-window
+   ----------------------------------------------------------------------------
+   Load this LAST (after styles.css/auth.css on app.html, and after
+   landing.css/auth.css on index.html) so its rules win. It is additive — it
+   does not modify any existing file. Pairs with js/mobile-nav.js (drawer) and
+   the optional js/open-maximized.js (fullscreen).
+   ========================================================================== */
+
+/* ==========================================================================
+   1) MAXIMIZED LAYOUT — the app fills the whole browser window
+   ========================================================================== */
+html, body { width: 100%; min-height: 100%; margin: 0; }
+body { overflow-x: hidden; }                 /* no stray horizontal scrollbar */
+body[data-pnx-page="app"] .app { min-height: 100vh; width: 100%; }
+body[data-pnx-page="app"] .main { min-width: 0; overflow-x: hidden; }
+
+/* ==========================================================================
+   2) TOP BAR READABILITY  (fixes the hard-to-read black text)
+   The bar was transparent and sticky, so the breadcrumb/section title
+   overlapped content scrolling underneath it. Give it a solid, theme-aware
+   backing and force high-contrast text in BOTH light and dark themes.
+   ========================================================================== */
+body[data-pnx-page="app"] .topbar,
+body[data-pnx-page="app"] .summary {
+  background: var(--page) !important;
+}
+body[data-pnx-page="app"] .topbar {
+  box-shadow: 0 1px 0 var(--line);
+  -webkit-backdrop-filter: saturate(140%) blur(8px);
+  backdrop-filter: saturate(140%) blur(8px);
+}
+body[data-pnx-page="app"] .crumb .cs,
+body[data-pnx-page="app"] .summary h1 { color: var(--ink) !important; font-weight: 800; }
+body[data-pnx-page="app"] .crumb .cg { color: var(--ink-soft) !important; }   /* was --ink-faint (too pale) */
+body[data-pnx-page="app"] .ai-search input { color: var(--ink) !important; }
+body[data-pnx-page="app"] .ai-search input::placeholder { color: var(--ink-faint); }
+
+/* ==========================================================================
+   3) RESPONSIVENESS — APP (app.html), incl. the HAMBURGER DRAWER sidebar
+   ========================================================================== */
+/* Hamburger button (injected by mobile-nav.js) — hidden on desktop */
+body[data-pnx-page="app"] .pnx-burger { display: none; }
+
+@media (max-width: 920px) {
+  /* main content takes the full width */
+  body[data-pnx-page="app"] .app { grid-template-columns: 1fr; }
+
+  /* show the hamburger at the left of the top bar */
+  body[data-pnx-page="app"] .pnx-burger {
+    display: inline-grid; place-items: center; flex: none;
+    width: 38px; height: 38px; margin-right: 4px;
+    border: 1px solid var(--line); border-radius: 10px;
+    background: var(--surface); color: var(--ink); cursor: pointer;
+    transition: background .15s, border-color .15s, transform .1s;
+  }
+  body[data-pnx-page="app"] .pnx-burger:hover { border-color: var(--purple); color: var(--purple-dark); }
+  body[data-pnx-page="app"] .pnx-burger:active { transform: translateY(1px); }
+
+  /* sidebar becomes an off-canvas drawer that slides in from the left */
+  body[data-pnx-page="app"] .sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: min(86vw, 300px); height: 100vh; max-height: none;
+    transform: translateX(-100%);
+    transition: transform .26s ease;
+    z-index: 120; overflow-y: auto;
+    border-right: 1px solid var(--line);
+    box-shadow: 0 18px 50px rgba(20, 30, 40, .28);
+  }
+  body[data-pnx-page="app"].pnx-drawer-open .sidebar { transform: translateX(0); }
+
+  /* single-column nav inside the narrow drawer */
+  body[data-pnx-page="app"] .sidebar .nav { grid-template-columns: 1fr; }
+
+  /* dimmed backdrop (injected by mobile-nav.js) */
+  body[data-pnx-page="app"] .pnx-drawer-bg {
+    position: fixed; inset: 0; z-index: 110;
+    background: rgba(12, 16, 23, .5);
+    opacity: 0; visibility: hidden;
+    transition: opacity .26s ease, visibility .26s ease;
+  }
+  body[data-pnx-page="app"].pnx-drawer-open .pnx-drawer-bg { opacity: 1; visibility: visible; }
+}
+
+/* Phones: stop the top bar from overflowing; give search its own row. */
+@media (max-width: 760px) {
+  body[data-pnx-page="app"] .topbar { flex-wrap: wrap; gap: 10px; padding: 10px 14px 6px; }
+  body[data-pnx-page="app"] .crumb { min-width: 0; }
+  body[data-pnx-page="app"] .ai-search-wrap { order: 3; flex-basis: 100%; }
+  body[data-pnx-page="app"] .ai-search { width: 100%; }
+  body[data-pnx-page="app"] .tb-right { gap: 8px; }
+  body[data-pnx-page="app"] .summary { padding: 8px 14px 12px; }
+  body[data-pnx-page="app"] .content { padding-left: 14px !important; padding-right: 14px !important; }
+
+  /* Nexi chat: fill the phone screen instead of a tiny floating box */
+  body[data-pnx-page="app"] .pni {
+    right: 12px; left: 12px; width: auto;
+    bottom: 84px; height: calc(100vh - 150px); max-height: none;
+  }
+  body[data-pnx-page="app"] .pni-fab  { right: 16px; bottom: 16px; width: 54px; height: 54px; }
+  body[data-pnx-page="app"] .pni-toast { right: 12px; left: 12px; }
+}
+
+/* Small phones: icon-only top-bar buttons. */
+@media (max-width: 520px) {
+  body[data-pnx-page="app"] .tb-btn { font-size: 0; gap: 0; padding: 9px 11px; }
+  body[data-pnx-page="app"] .tb-btn svg { width: 18px; height: 18px; }
+  body[data-pnx-page="app"] .crumb .cs { font-size: 15px; }
+}
+
+/* ==========================================================================
+   4) RESPONSIVENESS — LANDING (index.html) small-screen polish
+   (landing.css already handles the nav burger + column collapse; this just
+   tightens spacing and makes CTAs full-width on phones.)
+   ========================================================================== */
+@media (max-width: 600px) {
+  .wrap { padding: 0 16px; }
+  .hero { padding: 104px 0 56px; }
+  .hero h1 { font-size: 30px; }
+  .hero p.lead { font-size: 16px; }
+  .hero-cta .btn, .demo-cta .btn { width: 100%; }
+  .sec-head h2 { font-size: 26px; }
+  section.band { padding: 56px 0; }
+}
