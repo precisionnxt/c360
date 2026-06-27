@@ -111,10 +111,26 @@
   /* ====================================================================== */
   /*  REAL OAUTH                                                            */
   /* ====================================================================== */
+  // Load MSAL from whichever CDN is reachable — a 404 or a blocked host on one
+  // is retried on the next. Fixes the "load …msal-browser.min.js" failure.
+  var MSAL_URLS = [
+    "https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.4/lib/msal-browser.min.js",
+    "https://unpkg.com/@azure/msal-browser@2.38.4/lib/msal-browser.min.js",
+    "https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
+  ];
+  function loadMsal() {
+    return new Promise(function (resolve, reject) {
+      (function go(i) {
+        if (typeof msal !== "undefined") return resolve();
+        if (i >= MSAL_URLS.length) return reject(new Error("MSAL failed to load from all CDNs"));
+        loadScript(MSAL_URLS[i]).then(function () { typeof msal !== "undefined" ? resolve() : go(i + 1); }).catch(function () { go(i + 1); });
+      })(0);
+    });
+  }
   function signInMicrosoft(btn) {
     if (!MS_LIVE) return;
     setBusy(btn, true);
-    loadScript("https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js")
+    loadMsal()
       .then(function () {
         var pca = new msal.PublicClientApplication({
           auth: {
