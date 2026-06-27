@@ -11,7 +11,7 @@
         the ID is public and safe to expose; a client SECRET must NEVER go here.)
        Step-by-step: see DEPLOY-GITHUB-PAGES.md.
 
-   Fill the EmailJS block to get an email at ajay@theteamalpha.net every time a
+   Fill the EmailJS block to get an email at precisionnxt@gmail.com every time a
    NEW person signs up.
    ========================================================================== */
 
@@ -32,9 +32,11 @@ window.PNX_AUTH_CONFIG = {
 
   /* -- Microsoft sign-in --------------------------------------------------- */
   // Azure Portal > App registrations > (your app) > Application (client) ID.
-  // tenant: "common" (any Microsoft account), "organizations", or your tenant ID.
+  // tenant: "common" (any org + personal Microsoft accounts), "organizations", or your tenant ID.
+  // App is now multitenant + personal accounts, so tenant = "common".
+  // (For org-only, set tenant back to "87a5c821-baaa-4a47-b152-b1cece1506e7".)
   microsoft: {
-    clientId: "d9056422-fc27-456e-9bfb-c770054d634b",            // <-- paste to enable real Microsoft login
+    clientId: "d9056422-fc27-456e-9bfb-c770054d634b",
     tenant:   "common"
   },
 
@@ -48,7 +50,7 @@ window.PNX_AUTH_CONFIG = {
   // Free, no server. Get an Access Key in seconds at https://web3forms.com by
   // entering the inbox below — every demo entry is then emailed there.
   web3forms: {
-    accessKey:   "a12fdb48-ec17-4f1c-86fb-770be219adb8",                       // <-- paste your Web3Forms Access Key
+    accessKey:   "a12fdb48-ec17-4f1c-86fb-770be219adb8",
     notifyEmail: "precisionnxt@gmail.com"   // the inbox tied to the key (for reference)
   },
 
