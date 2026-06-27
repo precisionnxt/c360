@@ -143,9 +143,11 @@
           },
           cache: { cacheLocation: "localStorage" }
         });
-        // Full-page redirect flow — the most reliable on static hosting (no popup loops/spin).
-        // Sign-in finishes on auth-redirect.html, which records the user and opens the demo.
-        return pca.loginRedirect({ scopes: ["openid", "profile", "email"], prompt: "select_account" });
+        // Clear any stale "interaction in progress" flag left by a previous interrupted
+        // attempt (e.g. an AADSTS error page), then start a fresh full-page redirect.
+        return pca.handleRedirectPromise().catch(function () {}).then(function () {
+          return pca.loginRedirect({ scopes: ["openid", "profile", "email"], prompt: "select_account" });
+        });
       })
       .catch(function (err) { console.warn("[PNX] Microsoft sign-in failed to start:", err); setBusy(btn, false); });
   }
